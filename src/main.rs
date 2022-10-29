@@ -15,7 +15,10 @@ struct Args {
 fn main() {
     let args = Args::parse();
 
-    let mut f = File::create(args.file).expect("file open error");
+    let mut f = match File::create(args.file) {
+        Ok(file) => file,
+        Err(e) => panic!("Error: {:?}", e),
+    };
 
     let mut buf: String;
 
@@ -24,7 +27,12 @@ fn main() {
         match io::stdin().read_line(&mut buf) {
             Ok(n) => {
                 if n == 0 { break; }
-                else { write!(f, "{}", buf).expect("write error"); }
+                else {
+                    match write!(f, "{}", buf) {
+                        Ok(_) => (),
+                        Err(e) => panic!("Error!: {:?}", e),
+                    }
+                }
             }
             Err(e) => panic!("Error: {}", e),
         }
